@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+// --- КАСТОМНАЯ ТАСКА ---
+tasks.register('generateBuildInfo') {
+    def outputDir = file("${buildDir}/resources/main")
+    def outputFile = file("${outputDir}/build-info.txt")
+    
+    outputs.file(outputFile)
+
+    doLast {
+        // Форматируем дату (ГГГГ-ММ-ДД)
+        def currentDate = new Date().format('yyyy-MM-dd')
+        
+        outputDir.mkdirs() // Создаем папку, если её нет
+        
+        outputFile.text = """Version: ${project.version}
+Build date: ${currentDate}
+"""
+        println "Файл build-info.txt успешно сгенерирован в ${outputFile}"
+    }
+}
+
+// Заставляем задачу обработки ресурсов зависеть от нашей таски
+processResources.dependsOn generateBuildInfo
